@@ -22,7 +22,7 @@ message Marker {
 
 message EmptyGet {}
 
-service YourService {
+service MapsService {
     rpc GetMaps(EmptyGet) returns (Maps) {
         option (google.api.http).get = "/map";
     }

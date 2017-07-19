@@ -4,48 +4,75 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
+	"net"
+	"net/http"
+	"path/filepath"
 
-	"github.com/gin-gonic/gin"
-	"github.com/golang/protobuf/jsonpb"
-	pb "github.com/udryan10/grpc-rest-example/generated"
+	"github.com/grpc-ecosystem/grpc-gateway/runtime"
+	"github.com/udryan10/grpc-rest-example/generated"
+	"github.com/udryan10/grpc-rest-example/server"
+	context "golang.org/x/net/context"
+	"google.golang.org/grpc"
+)
+
+const (
+	rpcPort  = 9090
+	httpPort = 8080
 )
 
 func main() {
 
-	r := gin.Default()
-	r.GET("/", func(c *gin.Context) {
+	go rpcServer()
+	httpServer()
 
-		// Read the existing address book.
-		in, err := ioutil.ReadFile("./example.json")
-		if err != nil {
-			log.Fatalln("Error reading file:", err)
-		}
+}
 
-		// unmarshal json into protobuff
-		mapProto := &pb.Maps{}
-		if err := jsonpb.UnmarshalString(string(in), mapProto); err != nil {
-			log.Fatalln("Failed to parse json:", err)
-		}
+func httpServer() {
 
-		// .... do something meaningful ... //
-		for _, marker := range mapProto.Markers {
-			fmt.Println(marker.AwayTeam)
-		}
+	ctx := context.Background()
+	ctx, cancel := context.WithCancel(ctx)
+	defer cancel()
 
-		// marshal protobuff back to json and return
-		pbToJson := jsonpb.Marshaler{}
-		returnJSON, err := pbToJson.MarshalToString(mapProto)
+	//r := mux.NewRouter()
+	r := http.NewServeMux()
+	generatedMux := runtime.NewServeMux()
+	opts := []grpc.DialOption{grpc.WithInsecure()}
+
+	// Register the generated service handler endpoints
+	generated.RegisterMapsServiceHandlerFromEndpoint(ctx, generatedMux, fmt.Sprintf("localhost:%v", rpcPort), opts)
+
+	r.HandleFunc("/swagger.json", func(w http.ResponseWriter, r *http.Request) {
+		filePath, err := filepath.Abs("example.swagger.json")
 
 		if err != nil {
-			c.Abort()
+			log.Fatalln("Error loading file:", err)
+
 		}
-		c.String(200, returnJSON)
+
+		in, err := ioutil.ReadFile(filePath)
+		w.Write(in)
+		w.WriteHeader(http.StatusOK)
+
 	})
 
-	r.POST("/", func(c *gin.Context) {
-		c.JSON(200, gin.H{
-			"foo": "bar",
-		})
-	})
-	r.Run() // listen and serve on 0.0.0.0:8080
+	// bind generated mux to our main handler
+	r.Handle("/", generatedMux)
+
+	fmt.Printf("http server running on :%v \n", httpPort)
+
+	http.ListenAndServe(fmt.Sprintf(":%v", httpPort), r)
+}
+
+func rpcServer() {
+
+	tcpConn, err := net.Listen("tcp", fmt.Sprintf(":%v", rpcPort))
+	if err != nil {
+		panic("unable to establish tcpConn")
+	}
+	s := grpc.NewServer()
+
+	generated.RegisterMapsServiceServer(s, server.NewMapServer())
+
+	fmt.Printf("rpc server listening on :%v \n", rpcPort)
+	s.Serve(tcpConn)
 }

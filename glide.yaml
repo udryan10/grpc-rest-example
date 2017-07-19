@@ -1,3 +1,0 @@
-package: github.com/udryan10/grpc-rest-example
-import:
-- package: github.com/gin-gonic/gin
