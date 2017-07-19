@@ -1,0 +1,19 @@
+syntax = "proto3";
+package protoBuff;
+
+
+message Maps {
+ repeated Marker markers = 1;
+}
+
+message Marker {
+    int32 point = 1;
+    string homeTeam = 2;
+    string awayTeam = 3;
+    string markerImage = 4;
+    string information = 5;
+    string fixture = 6;
+    string capacity = 7;
+    string previousScore = 8;
+    string tv = 9;
+}
