@@ -1,6 +1,8 @@
 package server
 
 import (
+	"bytes"
+	"fmt"
 	"io/ioutil"
 	"log"
 	"path/filepath"
@@ -37,8 +39,13 @@ func (m *mapServer) GetMaps(context.Context, *generated.EmptyGet) (*generated.Ma
 
 	// unmarshal json into protobuff
 	mapProto := &generated.Maps{}
-	if err := jsonpb.UnmarshalString(string(in), mapProto); err != nil {
-		return nil, grpc.Errorf(codes.Unknown, " failed to parse json into protobuff ")
+
+	jsonUnmarshaler := jsonpb.Unmarshaler{
+		AllowUnknownFields: true,
+	}
+
+	if err := jsonUnmarshaler.Unmarshal(bytes.NewBuffer(in), mapProto); err != nil {
+		return nil, grpc.Errorf(codes.Unknown, fmt.Sprintf("failed to parse json into protobuff: %v", err))
 	}
 
 	return mapProto, nil

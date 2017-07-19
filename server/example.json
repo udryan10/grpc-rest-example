@@ -7,7 +7,8 @@
 			"information": "Linux users group meets second Wednesday of each month.",
 			"fixture": "Wednesday 7pm",
 			"capacity": "",
-            "previousScore": ""
+			"previousScore": "",
+			"unknown": true
 		},
 		{
 			"point": 2,

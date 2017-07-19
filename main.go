@@ -33,9 +33,9 @@ func httpServer() {
 	ctx, cancel := context.WithCancel(ctx)
 	defer cancel()
 
-	//r := mux.NewRouter()
 	r := http.NewServeMux()
-	generatedMux := runtime.NewServeMux()
+	// the nasty arguments are to tell the json parser to include fields that have default values. By default it removes them
+	generatedMux := runtime.NewServeMux(runtime.WithMarshalerOption(runtime.MIMEWildcard, &runtime.JSONPb{OrigName: true, EmitDefaults: true}))
 	opts := []grpc.DialOption{grpc.WithInsecure()}
 
 	// Register the generated service handler endpoints
