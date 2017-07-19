@@ -1,0 +1,81 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "example.proto",
+    "version": "version not set"
+  },
+  "schemes": [
+    "http",
+    "https"
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {
+    "/map": {
+      "get": {
+        "operationId": "GetMaps",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/generatedMaps"
+            }
+          }
+        },
+        "tags": [
+          "YourService"
+        ]
+      }
+    }
+  },
+  "definitions": {
+    "generatedMaps": {
+      "type": "object",
+      "properties": {
+        "markers": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/generatedMarker"
+          }
+        }
+      }
+    },
+    "generatedMarker": {
+      "type": "object",
+      "properties": {
+        "point": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "homeTeam": {
+          "type": "string"
+        },
+        "awayTeam": {
+          "type": "string"
+        },
+        "markerImage": {
+          "type": "string"
+        },
+        "information": {
+          "type": "string"
+        },
+        "fixture": {
+          "type": "string"
+        },
+        "capacity": {
+          "type": "string"
+        },
+        "previousScore": {
+          "type": "string"
+        },
+        "tv": {
+          "type": "string"
+        }
+      }
+    }
+  }
+}

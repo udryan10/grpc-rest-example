@@ -7,7 +7,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/golang/protobuf/jsonpb"
-	pb "github.com/udryan10/grpc-rest-example/protoBuff"
+	pb "github.com/udryan10/grpc-rest-example/generated"
 )
 
 func main() {
