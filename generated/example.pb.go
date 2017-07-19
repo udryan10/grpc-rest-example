@@ -19,6 +19,11 @@ import fmt "fmt"
 import math "math"
 import _ "google.golang.org/genproto/googleapis/api/annotations"
 
+import (
+	context "golang.org/x/net/context"
+	grpc "google.golang.org/grpc"
+)
+
 // Reference imports to suppress errors if they are not otherwise used.
 var _ = proto.Marshal
 var _ = fmt.Errorf
@@ -138,6 +143,78 @@ func init() {
 	proto.RegisterType((*Maps)(nil), "generated.Maps")
 	proto.RegisterType((*Marker)(nil), "generated.Marker")
 	proto.RegisterType((*EmptyGet)(nil), "generated.EmptyGet")
+}
+
+// Reference imports to suppress errors if they are not otherwise used.
+var _ context.Context
+var _ grpc.ClientConn
+
+// This is a compile-time assertion to ensure that this generated file
+// is compatible with the grpc package it is being compiled against.
+const _ = grpc.SupportPackageIsVersion4
+
+// Client API for YourService service
+
+type YourServiceClient interface {
+	GetMaps(ctx context.Context, in *EmptyGet, opts ...grpc.CallOption) (*Maps, error)
+}
+
+type yourServiceClient struct {
+	cc *grpc.ClientConn
+}
+
+func NewYourServiceClient(cc *grpc.ClientConn) YourServiceClient {
+	return &yourServiceClient{cc}
+}
+
+func (c *yourServiceClient) GetMaps(ctx context.Context, in *EmptyGet, opts ...grpc.CallOption) (*Maps, error) {
+	out := new(Maps)
+	err := grpc.Invoke(ctx, "/generated.YourService/GetMaps", in, out, c.cc, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+// Server API for YourService service
+
+type YourServiceServer interface {
+	GetMaps(context.Context, *EmptyGet) (*Maps, error)
+}
+
+func RegisterYourServiceServer(s *grpc.Server, srv YourServiceServer) {
+	s.RegisterService(&_YourService_serviceDesc, srv)
+}
+
+func _YourService_GetMaps_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(EmptyGet)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(YourServiceServer).GetMaps(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/generated.YourService/GetMaps",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(YourServiceServer).GetMaps(ctx, req.(*EmptyGet))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+var _YourService_serviceDesc = grpc.ServiceDesc{
+	ServiceName: "generated.YourService",
+	HandlerType: (*YourServiceServer)(nil),
+	Methods: []grpc.MethodDesc{
+		{
+			MethodName: "GetMaps",
+			Handler:    _YourService_GetMaps_Handler,
+		},
+	},
+	Streams:  []grpc.StreamDesc{},
+	Metadata: "example.proto",
 }
 
 func init() { proto.RegisterFile("example.proto", fileDescriptor0) }
