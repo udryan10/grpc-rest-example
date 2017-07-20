@@ -66,7 +66,7 @@ func httpServer() {
 	generated.RegisterMapsServiceHandlerFromEndpoint(ctx, generatedMux, fmt.Sprintf("localhost:%v", rpcPort), opts)
 
 	r.HandleFunc("/swagger.json", func(w http.ResponseWriter, r *http.Request) {
-		filePath, err := filepath.Abs("example.swagger.json")
+		filePath, err := filepath.Abs("./generated/example.swagger.json")
 
 		if err != nil {
 			log.Fatalln("Error loading file:", err)

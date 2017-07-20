@@ -2,6 +2,11 @@ syntax = "proto3";
 package generated;
 
 import "google/api/annotations.proto";
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+import "github.com/opsee/protobuf/opseeproto/opsee.proto";
+
+
+option (opseeproto.graphql) = true;
 
 message Maps {
  repeated Marker markers = 1;
