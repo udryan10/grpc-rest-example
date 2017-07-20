@@ -2,77 +2,16 @@ package main
 
 import (
 	"fmt"
-	"io/ioutil"
-	"log"
-	"net"
-	"net/http"
-	"path/filepath"
+	"os"
 
-	"github.com/grpc-ecosystem/grpc-gateway/runtime"
-	"github.com/udryan10/grpc-rest-example/generated"
-	"github.com/udryan10/grpc-rest-example/server"
-	context "golang.org/x/net/context"
-	"google.golang.org/grpc"
-)
-
-const (
-	rpcPort  = 9090
-	httpPort = 8080
+	"github.com/udryan10/grpc-rest-example/cmd"
 )
 
 func main() {
 
-	go rpcServer()
-	httpServer()
-
-}
-
-func httpServer() {
-
-	ctx := context.Background()
-	ctx, cancel := context.WithCancel(ctx)
-	defer cancel()
-
-	r := http.NewServeMux()
-	// the nasty arguments are to tell the json parser to include fields that have default values. By default it removes them
-	generatedMux := runtime.NewServeMux(runtime.WithMarshalerOption(runtime.MIMEWildcard, &runtime.JSONPb{OrigName: true, EmitDefaults: true}))
-	opts := []grpc.DialOption{grpc.WithInsecure()}
-
-	// Register the generated service handler endpoints
-	generated.RegisterMapsServiceHandlerFromEndpoint(ctx, generatedMux, fmt.Sprintf("localhost:%v", rpcPort), opts)
-
-	r.HandleFunc("/swagger.json", func(w http.ResponseWriter, r *http.Request) {
-		filePath, err := filepath.Abs("example.swagger.json")
-
-		if err != nil {
-			log.Fatalln("Error loading file:", err)
-
-		}
-
-		in, err := ioutil.ReadFile(filePath)
-		w.Write(in)
-		w.WriteHeader(http.StatusOK)
-
-	})
-
-	// bind generated mux to our main handler
-	r.Handle("/", generatedMux)
-
-	fmt.Printf("http server running on :%v \n", httpPort)
-
-	http.ListenAndServe(fmt.Sprintf(":%v", httpPort), r)
-}
-
-func rpcServer() {
-
-	tcpConn, err := net.Listen("tcp", fmt.Sprintf(":%v", rpcPort))
-	if err != nil {
-		panic("unable to establish tcpConn")
+	if err := cmd.RootCmd.Execute(); err != nil {
+		fmt.Fprintln(os.Stderr, err.Error())
+		os.Exit(-1)
 	}
-	s := grpc.NewServer()
 
-	generated.RegisterMapsServiceServer(s, server.NewMapServer())
-
-	fmt.Printf("rpc server listening on :%v \n", rpcPort)
-	s.Serve(tcpConn)
 }

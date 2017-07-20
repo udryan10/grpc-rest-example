@@ -1,0 +1,20 @@
+clean files
+review proto file
+review "implemented" code
+review protoc/generate
+
+Benefits:
+    Immediate:
+        - REST Server / RPC Server / TYPES / Swagger all genearted from proto file
+        - over 10 languages supported
+        - Protobuff provides backwards compatability
+        -  
+    Long Term:
+        Bidirectional Stream from client to server
+        Persistent connections
+        Flow Control
+        Multiplexing
+
+Challenges:
+    tyk with gRPC
+    versioning 
