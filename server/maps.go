@@ -24,6 +24,7 @@ func NewMapServer() generated.MapsServiceServer {
 
 func (m *mapServer) GetMaps(context.Context, *generated.EmptyGet) (*generated.Maps, error) {
 
+	fmt.Println("Call in GetMaps() rpc")
 	filePath, err := filepath.Abs("server/example.json")
 
 	if err != nil {
@@ -40,11 +41,11 @@ func (m *mapServer) GetMaps(context.Context, *generated.EmptyGet) (*generated.Ma
 	// unmarshal json into protobuff
 	mapProto := &generated.Maps{}
 
-	jsonUnmarshaler := jsonpb.Unmarshaler{
+	customJSONUnmarshaler := jsonpb.Unmarshaler{
 		AllowUnknownFields: true,
 	}
 
-	if err := jsonUnmarshaler.Unmarshal(bytes.NewBuffer(in), mapProto); err != nil {
+	if err := customJSONUnmarshaler.Unmarshal(bytes.NewBuffer(in), mapProto); err != nil {
 		return nil, grpc.Errorf(codes.Unknown, fmt.Sprintf("failed to parse json into protobuff: %v", err))
 	}
 
