@@ -71,6 +71,36 @@ func (m *markersServer) GetMarkersGraphQL(c context.Context, g *generated.GraphQ
 	return markerseProto, nil
 }
 
+func (m *markersServer) GetMarkersGraphQLSchema(c context.Context, g *generated.GraphQLQuery) (*generated.GraphQLQuery, error) {
+	fmt.Println("here")
+	schemaConfig := graphql.SchemaConfig{Query: GraphQLMapsType}
+
+	schema, err := graphql.NewSchema(schemaConfig)
+
+	if err != nil {
+		log.Fatalf("failed to create new schema, error: %v", err)
+	}
+
+	fmt.Println(g.Query)
+	params := graphql.Params{
+		Schema:        schema,
+		RequestString: g.Query,
+	}
+
+	r := graphql.Do(params)
+	if len(r.Errors) > 0 {
+		fmt.Println(r.Errors)
+		return &generated.GraphQLQuery{}, r.Errors[0]
+	}
+
+	rJSON, _ := json.Marshal(r.Data)
+
+	fmt.Println(string(rJSON))
+	return &generated.GraphQLQuery{
+		Query: string(rJSON),
+	}, nil
+}
+
 func loadMapFromDisk() (*generated.Markers, error) {
 	filePath, err := filepath.Abs("server/example.json")
 

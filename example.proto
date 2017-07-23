@@ -3,10 +3,6 @@ package generated;
 
 import "google/api/annotations.proto";
 
-
-message GraphQlMarkersWrapper {
-    Markers data = 1;
-}
 message Markers {
  repeated Marker markers = 1;
 }
@@ -30,7 +26,6 @@ message GraphQLQuery {
     string query = 1;
 }
 
-
 service MarkersService {
     rpc GetMarkers(EmptyGet) returns (Markers) {
         option (google.api.http).get = "/markers";
@@ -44,4 +39,12 @@ service MarkersService {
            }
         };
     }
+
+    rpc GetMarkersGraphQLSchema(GraphQLQuery) returns (GraphQLQuery){}
+}
+
+
+
+message GraphQlMarkersWrapper {
+    Markers data = 1;
 }

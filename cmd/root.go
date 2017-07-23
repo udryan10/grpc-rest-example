@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -74,6 +75,32 @@ func httpServer() {
 
 		in, err := ioutil.ReadFile(filePath)
 		w.Write(in)
+		w.WriteHeader(http.StatusOK)
+
+	})
+
+	r.HandleFunc("/schema", func(w http.ResponseWriter, r *http.Request) {
+		conn, err := grpc.Dial("127.0.0.1:9090", grpc.WithInsecure())
+		if err != nil {
+			panic("unable to connect to grpc server" + err.Error())
+		}
+		defer conn.Close()
+
+		// setup client
+		client := generated.NewMarkersServiceClient(conn)
+
+		body, _ := ioutil.ReadAll(r.Body)
+
+		var input generated.GraphQLQuery
+		json.Unmarshal(body, &input)
+
+		schema, err := client.GetMarkersGraphQLSchema(context.Background(), &input)
+		if err != nil {
+			panic(err.Error())
+		}
+		fmt.Println("here?")
+		fmt.Println(schema.Query)
+		w.Write([]byte(schema.Query))
 		w.WriteHeader(http.StatusOK)
 
 	})
