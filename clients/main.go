@@ -20,6 +20,7 @@ func main() {
 	tests := []func(){
 		httpRequestNoClient,
 		httpRequestClient,
+		httpRequestProtoBuf,
 		rpcRequest,
 	}
 	fmt.Println("beginning tests...\n\n\n")
@@ -35,8 +36,8 @@ func main() {
 
 func httpRequestNoClient() {
 
-	fmt.Println("making http call http://localhost:8080/map \n")
-	body, err := _makeHttp()
+	fmt.Println("making http call http://localhost:8080/markers \n")
+	body, err := _makeHttp("application/json", "application/json")
 
 	if err != nil {
 		panic("error in _makeHttp()" + err.Error())
@@ -48,16 +49,17 @@ func httpRequestNoClient() {
 }
 
 func httpRequestClient() {
-	fmt.Println("making http call http://localhost:8080/map marshalling into protobuff \n")
+	fmt.Println("making http call http://localhost:8080/markers, receiving json and marshalling into protobuff \n")
 
-	body, err := _makeHttp()
+	body, err := _makeHttp("application/json", "application/json")
 
 	if err != nil {
 		panic("error in _makeHttp()" + err.Error())
 	}
 
 	// marshall JSON string into protobuff type from generated client
-	maps := generated.Maps{}
+	maps := generated.Markers{}
+
 	jsonpb.UnmarshalString(string(body), &maps)
 
 	fmt.Println("protobuff: ")
@@ -75,10 +77,10 @@ func rpcRequest() {
 	defer conn.Close()
 
 	// setup client
-	client := generated.NewMapsServiceClient(conn)
+	client := generated.NewMarkersServiceClient(conn)
 
 	// rpc call
-	maps, err := client.GetMaps(context.Background(), &generated.EmptyGet{})
+	maps, err := client.GetMarkers(context.Background(), &generated.EmptyGet{})
 
 	if err != nil {
 		panic("error in GetMaps()")
@@ -88,9 +90,11 @@ func rpcRequest() {
 	fmt.Println("        " + maps.String() + "\n")
 }
 
-func _makeHttp() ([]byte, error) {
-	request, _ := http.NewRequest("GET", "http://localhost:8080/map", nil)
+func _makeHttp(contentType, accept string) ([]byte, error) {
+	request, _ := http.NewRequest("GET", "http://localhost:8080/markers", nil)
 
+	request.Header.Add("Content-Type", contentType)
+	request.Header.Add("Accept", accept)
 	client := &http.Client{}
 	resp, err := client.Do(request)
 

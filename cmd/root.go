@@ -47,8 +47,8 @@ var startRpcServer bool
 var startHttpServer bool
 
 func init() {
-	RootCmd.PersistentFlags().BoolVar(&startRpcServer, "startRpcServer", false, "start rpc server")
-	RootCmd.PersistentFlags().BoolVar(&startHttpServer, "startHttpServer", false, "start http server")
+	RootCmd.PersistentFlags().BoolVar(&startRpcServer, "startRpcServer", true, "start rpc server")
+	RootCmd.PersistentFlags().BoolVar(&startHttpServer, "startHttpServer", true, "start http server")
 }
 
 func httpServer() {
@@ -59,12 +59,11 @@ func httpServer() {
 
 	r := http.NewServeMux()
 	// the nasty arguments are to tell the json parser to include fields that have default values. By default it removes them
-	generatedMux := runtime.NewServeMux(runtime.WithMarshalerOption(runtime.MIMEWildcard, &runtime.JSONPb{OrigName: true, EmitDefaults: true}))
+	generatedMux := runtime.NewServeMux(runtime.WithMarshalerOption(runtime.MIMEWildcard, &runtime.JSONPb{OrigName: true, EmitDefaults: false}))
 	opts := []grpc.DialOption{grpc.WithInsecure()}
 
 	// Register the generated service handler endpoints
-	generated.RegisterMapsServiceHandlerFromEndpoint(ctx, generatedMux, fmt.Sprintf("localhost:%v", rpcPort), opts)
-
+	generated.RegisterMarkersServiceHandlerFromEndpoint(ctx, generatedMux, fmt.Sprintf("localhost:%v", rpcPort), opts)
 	r.HandleFunc("/swagger.json", func(w http.ResponseWriter, r *http.Request) {
 		filePath, err := filepath.Abs("./generated/example.swagger.json")
 
@@ -95,7 +94,7 @@ func rpcServer() {
 	}
 	s := grpc.NewServer()
 
-	generated.RegisterMapsServiceServer(s, server.NewMapServer())
+	generated.RegisterMarkersServiceServer(s, server.NewMarkersServer())
 
 	fmt.Printf("rpc server listening on :%v \n", rpcPort)
 	s.Serve(tcpConn)

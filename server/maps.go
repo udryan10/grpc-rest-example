@@ -2,12 +2,14 @@ package server
 
 import (
 	"bytes"
+	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"log"
 	"path/filepath"
 
 	"github.com/gogo/protobuf/jsonpb"
+	"github.com/graphql-go/graphql"
 	"github.com/udryan10/grpc-rest-example/generated"
 	context "golang.org/x/net/context"
 	"google.golang.org/grpc"
@@ -15,16 +17,61 @@ import (
 )
 
 // implements the MapsService
-type mapServer struct{}
+type markersServer struct{}
 
 // NewMapServer - returns a mapServer
-func NewMapServer() generated.MapsServiceServer {
-	return new(mapServer)
+func NewMarkersServer() generated.MarkersServiceServer {
+	return new(markersServer)
 }
 
-func (m *mapServer) GetMaps(context.Context, *generated.EmptyGet) (*generated.Maps, error) {
+func (m *markersServer) GetMarkers(context.Context, *generated.EmptyGet) (*generated.Markers, error) {
 
-	fmt.Println("Call in GetMaps() rpc")
+	return loadMapFromDisk()
+}
+
+// implements MapsGetter
+type graphQLClient struct{}
+
+func (g graphQLClient) GetMarkers() *generated.Markers {
+	maps, _ := loadMapFromDisk()
+	return maps
+}
+
+func (m *markersServer) GetMarkersGraphQL(c context.Context, g *generated.GraphQLQuery) (*generated.GraphQlMarkersWrapper, error) {
+
+	schemaConfig := graphql.SchemaConfig{Query: GraphQLMapsType}
+
+	schema, err := graphql.NewSchema(schemaConfig)
+
+	if err != nil {
+		log.Fatalf("failed to create new schema, error: %v", err)
+	}
+
+	params := graphql.Params{
+		Schema:        schema,
+		RequestString: g.Query,
+	}
+
+	r := graphql.Do(params)
+	if len(r.Errors) > 0 {
+		return &generated.GraphQlMarkersWrapper{}, r.Errors[0]
+	}
+	rJSON, _ := json.Marshal(r)
+
+	fmt.Println(string(rJSON))
+	// unmarshal json into protobuff
+	markerseProto := &generated.GraphQlMarkersWrapper{}
+	customJSONMarshaler := jsonpb.Unmarshaler{}
+
+	if err := customJSONMarshaler.Unmarshal(bytes.NewBuffer(rJSON), markerseProto); err != nil {
+		return nil, grpc.Errorf(codes.Unknown, fmt.Sprintf("failed to parse json into protobuff: %v", err))
+	}
+	fmt.Println(markerseProto)
+
+	return markerseProto, nil
+}
+
+func loadMapFromDisk() (*generated.Markers, error) {
 	filePath, err := filepath.Abs("server/example.json")
 
 	if err != nil {
@@ -39,7 +86,7 @@ func (m *mapServer) GetMaps(context.Context, *generated.EmptyGet) (*generated.Ma
 	}
 
 	// unmarshal json into protobuff
-	mapProto := &generated.Maps{}
+	mapProto := &generated.Markers{}
 
 	customJSONUnmarshaler := jsonpb.Unmarshaler{
 		AllowUnknownFields: true,

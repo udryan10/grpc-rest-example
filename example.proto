@@ -2,13 +2,12 @@ syntax = "proto3";
 package generated;
 
 import "google/api/annotations.proto";
-import "github.com/gogo/protobuf/gogoproto/gogo.proto";
-import "github.com/opsee/protobuf/opseeproto/opsee.proto";
 
 
-option (opseeproto.graphql) = true;
-
-message Maps {
+message GraphQlMarkersWrapper {
+    Markers data = 1;
+}
+message Markers {
  repeated Marker markers = 1;
 }
 
@@ -27,8 +26,22 @@ message Marker {
 
 message EmptyGet {}
 
-service MapsService {
-    rpc GetMaps(EmptyGet) returns (Maps) {
-        option (google.api.http).get = "/map";
+message GraphQLQuery {
+    string query = 1;
+}
+
+
+service MarkersService {
+    rpc GetMarkers(EmptyGet) returns (Markers) {
+        option (google.api.http).get = "/markers";
+    }
+    rpc GetMarkersGraphQL(GraphQLQuery) returns (GraphQlMarkersWrapper) {
+        option (google.api.http) = {
+            get: "/graphql";
+            additional_bindings {
+             post: "/graphql"
+             body: "*"
+           }
+        };
     }
 }

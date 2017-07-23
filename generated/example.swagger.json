@@ -15,32 +15,85 @@
     "application/json"
   ],
   "paths": {
-    "/map": {
+    "/graphql": {
       "get": {
-        "operationId": "GetMaps",
+        "operationId": "GetMarkersGraphQL",
         "responses": {
           "200": {
             "description": "",
             "schema": {
-              "$ref": "#/definitions/generatedMaps"
+              "$ref": "#/definitions/generatedGraphQlMarkersWrapper"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "query",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "MarkersService"
+        ]
+      },
+      "post": {
+        "operationId": "GetMarkersGraphQL",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/generatedGraphQlMarkersWrapper"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/generatedGraphQLQuery"
+            }
+          }
+        ],
+        "tags": [
+          "MarkersService"
+        ]
+      }
+    },
+    "/markers": {
+      "get": {
+        "operationId": "GetMarkers",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/generatedMarkers"
             }
           }
         },
         "tags": [
-          "MapsService"
+          "MarkersService"
         ]
       }
     }
   },
   "definitions": {
-    "generatedMaps": {
+    "generatedGraphQLQuery": {
       "type": "object",
       "properties": {
-        "markers": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/generatedMarker"
-          }
+        "query": {
+          "type": "string"
+        }
+      }
+    },
+    "generatedGraphQlMarkersWrapper": {
+      "type": "object",
+      "properties": {
+        "data": {
+          "$ref": "#/definitions/generatedMarkers"
         }
       }
     },
@@ -74,6 +127,17 @@
         },
         "tv": {
           "type": "string"
+        }
+      }
+    },
+    "generatedMarkers": {
+      "type": "object",
+      "properties": {
+        "markers": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/generatedMarker"
+          }
         }
       }
     }
