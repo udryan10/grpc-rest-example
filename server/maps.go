@@ -58,7 +58,6 @@ func (m *markersServer) GetMarkersGraphQL(c context.Context, g *generated.GraphQ
 	}
 	rJSON, _ := json.Marshal(r)
 
-	fmt.Println(string(rJSON))
 	// unmarshal json into protobuff
 	markerseProto := &generated.GraphQlMarkersWrapper{}
 	customJSONMarshaler := jsonpb.Unmarshaler{}
@@ -66,13 +65,11 @@ func (m *markersServer) GetMarkersGraphQL(c context.Context, g *generated.GraphQ
 	if err := customJSONMarshaler.Unmarshal(bytes.NewBuffer(rJSON), markerseProto); err != nil {
 		return nil, grpc.Errorf(codes.Unknown, fmt.Sprintf("failed to parse json into protobuff: %v", err))
 	}
-	fmt.Println(markerseProto)
 
 	return markerseProto, nil
 }
 
 func (m *markersServer) GetMarkersGraphQLSchema(c context.Context, g *generated.GraphQLQuery) (*generated.GraphQLQuery, error) {
-	fmt.Println("here")
 	schemaConfig := graphql.SchemaConfig{Query: GraphQLMapsType}
 
 	schema, err := graphql.NewSchema(schemaConfig)
@@ -81,7 +78,6 @@ func (m *markersServer) GetMarkersGraphQLSchema(c context.Context, g *generated.
 		log.Fatalf("failed to create new schema, error: %v", err)
 	}
 
-	fmt.Println(g.Query)
 	params := graphql.Params{
 		Schema:        schema,
 		RequestString: g.Query,
@@ -89,13 +85,11 @@ func (m *markersServer) GetMarkersGraphQLSchema(c context.Context, g *generated.
 
 	r := graphql.Do(params)
 	if len(r.Errors) > 0 {
-		fmt.Println(r.Errors)
 		return &generated.GraphQLQuery{}, r.Errors[0]
 	}
 
 	rJSON, _ := json.Marshal(r.Data)
 
-	fmt.Println(string(rJSON))
 	return &generated.GraphQLQuery{
 		Query: string(rJSON),
 	}, nil

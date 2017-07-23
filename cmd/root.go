@@ -96,10 +96,10 @@ func httpServer() {
 
 		schema, err := client.GetMarkersGraphQLSchema(context.Background(), &input)
 		if err != nil {
-			panic(err.Error())
+			w.Write([]byte(fmt.Sprintf(`{"error" : %v}`, err.Error())))
+			w.WriteHeader(http.StatusServiceUnavailable)
+			return
 		}
-		fmt.Println("here?")
-		fmt.Println(schema.Query)
 		w.Write([]byte(schema.Query))
 		w.WriteHeader(http.StatusOK)
 
