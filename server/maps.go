@@ -25,20 +25,13 @@ func NewMarkersServer() generated.MarkersServiceServer {
 }
 
 func (m *markersServer) GetMarkers(context.Context, *generated.EmptyGet) (*generated.Markers, error) {
-
+	fmt.Println("in grpc service...")
 	return loadMapFromDisk()
-}
-
-// implements MapsGetter
-type graphQLClient struct{}
-
-func (g graphQLClient) GetMarkers() *generated.Markers {
-	maps, _ := loadMapFromDisk()
-	return maps
 }
 
 func (m *markersServer) GetMarkersGraphQL(c context.Context, g *generated.GraphQLQuery) (*generated.GraphQlMarkersWrapper, error) {
 
+	fmt.Println("in grpc service...")
 	schemaConfig := graphql.SchemaConfig{Query: GraphQLMapsType}
 
 	schema, err := graphql.NewSchema(schemaConfig)

@@ -20,7 +20,6 @@ func main() {
 	tests := []func(){
 		httpRequestNoClient,
 		httpRequestClient,
-		httpRequestProtoBuf,
 		rpcRequest,
 	}
 	fmt.Println("beginning tests...\n\n\n")

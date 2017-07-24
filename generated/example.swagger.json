@@ -127,6 +127,9 @@
         },
         "tv": {
           "type": "string"
+        },
+        "foo": {
+          "type": "string"
         }
       }
     },

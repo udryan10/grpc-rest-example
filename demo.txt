@@ -1,7 +1,32 @@
-clean files
+what is protobuf?
+what is rpc?
+what is grpc?
+review example.json
 review proto file
-review "implemented" code
+clean files
 review protoc/generate
+review code
+    generated
+        rpc stubs
+        rest stubs
+        swagger.json
+review client code
+benefits of protobuf
+    - schemas
+    - server/client generated from same proto   
+    - backwards compatability
+    - binary format so its fast
+    - focus on "what" and now "how"
+    - generator plugins
+long term benefits of grpc
+what is graphql
+execute graphql queries
+execute graphql schema queries
+graphIql
+
+
+
+
 
 Benefits:
     Immediate:
@@ -16,6 +41,14 @@ Benefits:
         Flow Control
         Multiplexing
 
+
 Challenges:
     tyk with gRPC
     versioning 
+
+
+graphIql
+
+graphql:
+curl -H -XPOST 'http://localhost:8080/graphql' -d '{ "query": "{markers{point homeTeam}}"}'
+curl -H -XPOST 'http://localhost:8080/schema' -d '{ "query": "{__schema{types{name}}}"}' -v

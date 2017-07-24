@@ -18,6 +18,7 @@ message Marker {
     string capacity = 7;
     string previousScore = 8;
     string tv = 9;
+    string foo = 10;
 }
 
 message EmptyGet {}
